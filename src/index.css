@@ -1,0 +1,182 @@
+@import 'tailwindcss';
+
+/* ------------------------------------------------------------------ */
+/*  Tokens                                                             */
+/* ------------------------------------------------------------------ */
+@theme {
+  /* Paleta: névoa fria + verde-concreto quase preto */
+  --color-mist: #e3eae7; /* fundo principal */
+  --color-fog: #f1f5f3; /* superfícies claras */
+  --color-ink: #151b18; /* texto / títulos */
+  --color-moss: #2d3833; /* superfícies escuras, CTA circular */
+  --color-sage: #7f8f88; /* texto secundário */
+  --color-stone: #b9c6c0; /* linhas e detalhes */
+
+  --font-display: 'Archivo Variable', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+  --font-sans: 'Geist Variable', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-syne: 'Syne', 'Arial Narrow', sans-serif;
+  --font-kanji: 'Shinka Kanji', 'Yu Gothic', 'Hiragino Sans', sans-serif;
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-marquee: marquee 38s linear infinite;
+  --animate-spin-slow: spin 22s linear infinite;
+  --animate-twinkle: twinkle 3.2s ease-in-out infinite;
+
+  @keyframes marquee {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+  @keyframes twinkle {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.45;
+      transform: scale(0.8);
+    }
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Base                                                               */
+/* ------------------------------------------------------------------ */
+/* Só os dois ideogramas do crédito da Shinka (進化). */
+@font-face {
+  font-family: 'Shinka Kanji';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('./assets/shinka-kanji.woff2') format('woff2');
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-mist font-sans text-ink antialiased;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  ::selection {
+    @apply bg-ink text-mist;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Componentes utilitários                                            */
+/* ------------------------------------------------------------------ */
+@layer components {
+  /* Título display: Archivo pesado, levemente expandido, entrelinha curta */
+  .display {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-stretch: 108%;
+    font-variation-settings: 'wdth' 108;
+    letter-spacing: -0.045em;
+    line-height: 0.9;
+    text-transform: uppercase;
+  }
+
+  /* Rótulos técnicos, como os de uma prancha de desenho */
+  .label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .container-x {
+    @apply mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-10;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Animações (apenas CSS, baratas: transform + opacity)               */
+/* ------------------------------------------------------------------ */
+
+/* Entrada das linhas do título ao carregar a página */
+.line-mask {
+  display: block;
+  overflow: hidden;
+  /* espaço extra para a cedilha do Ç não ser cortada */
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}
+.line-rise {
+  display: block;
+  animation: rise 1.1s var(--ease-out-soft) both;
+}
+.fade-in {
+  animation: fade 1.2s var(--ease-out-soft) both;
+}
+@keyframes rise {
+  from {
+    transform: translate3d(0, 105%, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Revelação ao rolar: um único IntersectionObserver (hooks/useReveal.ts)
+   adiciona .is-visible. Sem JS, o conteúdo aparece normalmente. */
+.reveal-ready .reveal {
+  opacity: 0;
+  transform: translate3d(0, 32px, 0);
+  transition:
+    opacity 0.9s var(--ease-out-soft),
+    transform 0.9s var(--ease-out-soft);
+}
+.reveal-ready .reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Marquee pausa quando o mouse está em cima */
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal-ready .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
